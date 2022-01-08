@@ -1,0 +1,152 @@
+﻿@page "/"
+@using AuthorBlazor.Data
+@using AuthorBlazor.Models
+@inject IAuthorBookService service
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+<h3>Filter by title 
+    <input type="text" @oninput="@((arg) => FilterByBookTitle(arg))" style="width:50px"/>
+    </h3>
+
+    <h3>Filter by author first name
+    <input type="text" @oninput="@((arg) => FilterByBookTitle(arg))" style="width:50px"/>
+    </h3>
+
+    <h3>Filter by author last name
+    <input type="text" @oninput="@((arg) => FilterByBookTitle(arg))" style="width:50px"/>
+    </h3>
+
+
+@if (authors == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+   <table class="table">
+        <thead>
+            <tr>
+                <th>ISBN</th>
+                <th>Title</th>
+                <th>Publication Year</th>
+                <th>Pages</th>
+                <th>Genre</th>
+                <th>Author first name</th>
+                <th>Author last name</th>
+                <th>Delete book (please refresh the page after delete)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in authors)
+            {
+                
+                    @foreach(var b in a.Books)
+                    {
+                        <tr>
+                    <td>@b.ISBN</td>
+                    <td>@b.Title</td>
+                    <td>@b.PublicationYear</td>
+                    <td>@b.NumOPage</td>
+                    <td>@b.Genre</td>
+                    <td>@a.FirstName</td>
+                    <td>@a.LastName</td>
+                    <td>
+                    <button @onclick="@(() => RemoveBook(b.ISBN, a.Id))">
+                        <i class="oi oi-trash" style="color:red"/>
+                    </button>
+                </td>
+                </tr>
+                    }
+                    
+            }
+        </tbody>
+    </table> 
+}
+
+
+@code {
+    private IList<Book> books;
+    private IList<Book> booksToShow;
+    private IList<Author> authors;
+    private IList<Author> authorsToShow;
+
+    private string? filterByTitle;
+    private void FilterByBookTitle(ChangeEventArgs args)
+    {
+        filterByTitle = null;
+        try
+        {
+            filterByTitle = args.Value.ToString();
+        }catch(Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        ExcuteFilter();
+    }
+
+    private string? filterByFirstname;
+    private string? filterByLastname;
+    private void FilterByFirstName(ChangeEventArgs args)
+    {
+        filterByFirstname = null;
+        try
+        {
+            filterByFirstname = args.Value.ToString();
+        }catch(Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        ExcuteFilter();
+    }
+    private void FilterBylastName(ChangeEventArgs args)
+    {
+        filterByLastname = null;
+        try
+        {
+            filterByLastname = args.Value.ToString();
+        }catch(Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        ExcuteFilter();
+    }
+
+    private void ExcuteFilter()
+    {
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            books = await service.GetBooksAsync();
+            booksToShow = books;
+            authors = await service.GetAuthorsAsync();
+            authorsToShow = authors;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    private async void RemoveBook(int isbn, int id)
+    {
+        Book bookToRemove = authors.First(a => a.Id == id).Books.First(b => b.ISBN == isbn);
+        try
+        {
+            await service.RemoveBookAsync(isbn);
+        }catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+}

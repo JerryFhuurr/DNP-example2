@@ -1,0 +1,101 @@
+﻿@page "/AddBook"
+
+@using AuthorBlazor.Data
+@using AuthorBlazor.Models
+@inject IAuthorBookService service
+
+<h3>AddBook (please refresh the page after add a book)</h3>
+
+@if (authors == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <EditForm Model="@newBook" OnValidSubmit="@AddNewBook">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            ISBN: <br />
+            <InputNumber @bind-Value="newBook.ISBN" />
+        </div>
+        <div class="form-group">
+            Title: <br />
+            <InputText @bind-Value="newBook.Title" />
+        </div>
+        <div class="form-group">
+            PublicationYear: <br />
+            <InputNumber @bind-Value="newBook.PublicationYear" />
+        </div>
+        <div class="form-group">
+            Pages: <br />
+            <InputNumber @bind-Value="newBook.NumOPage" />
+        </div>
+        <div class="form-group">
+            Genre: <br />
+            <InputText @bind-Value="newBook.Genre" />
+        </div>
+
+        <h2>Author list</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>First name</th>
+                    <th>Last name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in authors)
+                {
+                    <tr>
+                        <td>@a.Id</td>
+                        <td>@a.FirstName</td>
+                        <td>@a.LastName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="form-group">
+            Author id (please enter an exsist number): <br />
+            <InputNumber @bind-Value="id" />
+        </div>
+
+        <p class="actions">
+            <button class="btn btn-outline-dark" type="submit">Create</button>
+        </p>
+    </EditForm>
+}
+
+
+@code {
+    private IList<Author> authors;
+    private Book newBook = new Book();
+    private int id = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            authors = await service.GetAuthorsAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    private async Task AddNewBook()
+    {
+        try
+        {
+            await service.AddBookAsync(newBook, id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+}

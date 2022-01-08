@@ -1,0 +1,40 @@
+﻿@page "/AddAuthor"
+
+@using AuthorBlazor.Data
+@using AuthorBlazor.Models
+@inject IAuthorBookService service
+
+<h3>AddAuthor (please refresh the page after add an author)</h3>
+
+<EditForm Model="@newAuthor" OnValidSubmit="@AddNewAuthor">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group">
+        First name: <br/>
+        <InputText @bind-Value="newAuthor.FirstName" />
+    </div>
+    <div class="form-group">
+        Last name: <br/>
+        <InputText @bind-Value="newAuthor.LastName" />
+    </div>
+    <p class="actions">
+        <button class="btn btn-outline-dark" type="submit">Create</button>
+    </p>
+</EditForm>
+
+@code {
+    private Author newAuthor = new Author();
+
+    private async Task AddNewAuthor()
+    {
+        try
+        {
+            await service.AddAuthorAsync(newAuthor);
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+}
